@@ -8,9 +8,11 @@
 void serialOutput(){   // Decide How To Output Serial.
   switch(outputType){
     case PROCESSING_VISUALIZER:
-      sendDataToSerial('S', Signal);     // goes to sendDataToSerial function
+      //sendDataToSerial('S', Signal);     // goes to sendDataToSerial function
+      Serial.println(BPM);
       break;
     case SERIAL_PLOTTER:  // open the Arduino Serial Plotter to visualize these data
+//      Serial.write(BPM);
       Serial.print(BPM);
       Serial.print(",");
       Serial.print(IBI);

@@ -34,7 +34,7 @@ volatile boolean QS = false;        // becomes true when Arduoino finds a beat.
 //      https://github.com/WorldFamousElectronics/PulseSensor_Amped_Processing_Visualizer
 // SERIAL_PLOTTER outputs sensor data for viewing with the Arduino Serial Plotter
 //      run the Serial Plotter at 115200 baud: Tools/Serial Plotter or Command+L
-static int outputType = SERIAL_PLOTTER;
+static int outputType = PROCESSING_VISUALIZER;
 
 
   // FIRST, CREATE VARIABLES TO PERFORM THE SAMPLE TIMING AND LED FADE FUNCTIONS
@@ -70,7 +70,7 @@ static int outputType = SERIAL_PLOTTER;
         fadeRate = 255;         // Makes the LED Fade Effect Happen
                                 // Set 'fadeRate' Variable to 255 to fade LED with pulse
         fadeTime = millis();    // Set the fade timer to fade the LED
-        serialOutputWhenBeatHappens();   // A Beat Happened, Output that to serial.
+        //serialOutputWhenBeatHappens();   // A Beat Happened, Output that to serial.
         QS = false;                      // reset the Quantified Self flag for next time
   }
   

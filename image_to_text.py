@@ -9,6 +9,7 @@ def teardown():
   camera.release()
   cv2.destroyAllWindows()
   ser.close()
+  quit()
 
 # Taken from https://www.youtube.com/watch?v=83vFL6d57OI
 def process_image(image_path):
@@ -29,12 +30,14 @@ def process_image(image_path):
 
 
 # SETUP
+bpmThreshold = 65
 camera_port = 1
 camera = cv2.VideoCapture(camera_port)
-ser = serial.Serial('/dev/cu.usbmodem1421')
+ser = serial.Serial('/dev/cu.usbmodem1411')
 print (ser.name)
 
 while True:
+  awake = True
   ret, frame = camera.read()
   cv2.imshow('window',frame)
   k = cv2.waitKey(1) & 0xFF
@@ -44,10 +47,26 @@ while True:
   if k == ord('q'): #press 'q' to stop
     print('quitting')
     break
-  BPM = ser.readline();
-  print(BPM)
-  beats = int.from_bytes(BPM, byteorder='big')
-  print(beats)
+  BPMSerial = ser.readline();
+  #print (BPM)
+  stringBPM = str(BPMSerial).split('\\')[0]
+  #print (stringBPM)
+  finalStringBPM = (stringBPM[2:])
+  print(finalStringBPM)
+  if finalStringBPM != '':
+      BPM = int(finalStringBPM)
+      awake = (BPM > bpmThreshold)
+
+  if not awake:
+      print('user asleep, capturing image')
+      cv2.imwrite('asleep.png', frame)
+      break
+
+
+
+
+  # beats = int.from_bytes(BPM, byteorder='big')
+  # print(beats)
 
 
 teardown()

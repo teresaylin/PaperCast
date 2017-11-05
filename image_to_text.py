@@ -4,6 +4,9 @@ from PIL import Image
 import pytesseract
 import os
 import serial
+from threading import Timer
+
+calibrated = False
 
 def teardown():
   camera.release()
@@ -28,6 +31,11 @@ def process_image(image_path):
   os.system("say " + "'" + result + "'")
   teardown()
 
+def calibrate():
+    global calibrated
+    calibrated = True
+
+    print("calibrated" + str(calibrated))
 
 # SETUP
 bpmThreshold = 65
@@ -36,7 +44,15 @@ camera = cv2.VideoCapture(camera_port)
 ser = serial.Serial('/dev/cu.usbmodem1411')
 print (ser.name)
 
+t = Timer(15, calibrate)
+t.start()
+
+print("starting loop")
+
 while True:
+
+
+  print("calibrated" + str(calibrated))
   awake = True
   ret, frame = camera.read()
   cv2.imshow('window',frame)
@@ -56,10 +72,11 @@ while True:
   if finalStringBPM != '':
       BPM = int(finalStringBPM)
       awake = (BPM > bpmThreshold)
+      print("Awake: " + str(awake))
 
-  if not awake:
+  if not awake and calibrated:
       print('user asleep, capturing image')
-      cv2.imwrite('asleep.png', frame)
+      cv2.imwrite('text.png', frame)
       break
 
 

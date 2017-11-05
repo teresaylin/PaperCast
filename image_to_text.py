@@ -3,10 +3,12 @@ import numpy as np
 from PIL import Image
 import pytesseract
 import os
+import serial
 
 def teardown():
   camera.release()
   cv2.destroyAllWindows()
+  ser.close()
 
 # Taken from https://www.youtube.com/watch?v=83vFL6d57OI
 def process_image(image_path):
@@ -29,6 +31,8 @@ def process_image(image_path):
 # SETUP
 camera_port = 1
 camera = cv2.VideoCapture(camera_port)
+ser = serial.Serial('/dev/cu.usbmodem1421')
+print (ser.name)
 
 while True:
   ret, frame = camera.read()
@@ -40,9 +44,13 @@ while True:
   if k == ord('q'): #press 'q' to stop
     print('quitting')
     break
+  BPM = ser.readline();
+  print(BPM)
+  beats = int.from_bytes(BPM, byteorder='big')
+  print(beats)
+
 
 teardown()
 
 
 process_image("camera_image.png")
-

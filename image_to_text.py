@@ -39,7 +39,7 @@ def calibrate():
 
 # SETUP
 bpmThreshold = 65
-camera_port = 1
+camera_port = 2
 camera = cv2.VideoCapture(camera_port)
 ser = serial.Serial('/dev/cu.usbmodem1411')
 print (ser.name)

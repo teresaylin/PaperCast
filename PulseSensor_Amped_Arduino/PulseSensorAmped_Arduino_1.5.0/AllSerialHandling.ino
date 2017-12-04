@@ -29,8 +29,9 @@ void serialOutput(){   // Decide How To Output Serial.
 void serialOutputWhenBeatHappens(){
   switch(outputType){
     case PROCESSING_VISUALIZER:    // find it here https://github.com/WorldFamousElectronics/PulseSensor_Amped_Processing_Visualizer
-      sendDataToSerial('B',BPM);   // send heart rate with a 'B' prefix
-      sendDataToSerial('Q',IBI);   // send time between beats with a 'Q' prefix
+//      sendDataToSerial('B',BPM);   // send heart rate with a 'B' prefix
+//      sendDataToSerial('Q',IBI);   // send time between beats with a 'Q' prefix
+        Serial.println(BPM);
       break;
 
     default:

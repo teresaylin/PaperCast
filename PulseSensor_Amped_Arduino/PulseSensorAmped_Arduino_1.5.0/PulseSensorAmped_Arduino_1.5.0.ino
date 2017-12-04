@@ -56,7 +56,7 @@ static int outputType = PROCESSING_VISUALIZER;
   //IN THE LOOP, ADD THE CODE THAT WILL DO THE 2mS TIMING, AND CALL THE getPulse() FUNCTION.
   void loop(){
 
-    serialOutput() ;
+    //serialOutput() ;
 
     thisTime = micros();            // GET THE CURRENT TIME
     if(thisTime - lastTime > 2000){ // CHECK TO SEE IF 2mS HAS PASSED
@@ -65,12 +65,12 @@ static int outputType = PROCESSING_VISUALIZER;
     }
 
   if (QS == true){     // A Heartbeat Was Found
-                       // BPM and IBI have been Determined
+                       //    and IBI have been Determined
                        // Quantified Self "QS" true when arduino finds a heartbeat
         fadeRate = 255;         // Makes the LED Fade Effect Happen
                                 // Set 'fadeRate' Variable to 255 to fade LED with pulse
         fadeTime = millis();    // Set the fade timer to fade the LED
-        //serialOutputWhenBeatHappens();   // A Beat Happened, Output that to serial.
+        serialOutputWhenBeatHappens();   // A Beat Happened, Output that to serial.
         QS = false;                      // reset the Quantified Self flag for next time
   }
   

@@ -30,12 +30,13 @@ def process_image(image_path):
   cv2.imwrite(image_path + "_thresh.png", img)
   result = pytesseract.image_to_string(Image.open(image_path + "_thresh.png"))
 #  print 'result text: ' + result
+  # engine.say(result)
+  # engine.runAndWait()
 
   originalText = pytesseract.image_to_string(Image.open(image_path))
   print 'original text: ' + originalText
   engine.say(originalText)
   engine.runAndWait()
-  #os.system("say " + "'" + result + "'")
   teardown()
 
 def calibrate():
@@ -103,4 +104,4 @@ while True:
 teardown()
 
 
-process_image("page.jpg")
+process_image("good_textonly.jpg")

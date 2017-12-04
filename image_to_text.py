@@ -30,7 +30,7 @@ def process_image(image_path):
   
   # print(result)
   # os.system("say " + "'" + result + "'")
-  originalText = pytesseract.image_to_string(Image.open(image_path))
+  # originalText = pytesseract.image_to_string(Image.open(image_path))
   print(originalText)
   os.system("say " + "'" + originalText + "'")
 
@@ -84,4 +84,4 @@ while True:
 
 teardown()
 
-process_image("text.png")
+process_image("good_textonly.png")

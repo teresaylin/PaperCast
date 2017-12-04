@@ -12,12 +12,12 @@ def teardown():
   camera.release()
   cv2.destroyAllWindows()
   ser.close()
-  quit()
 
 # Taken from https://www.youtube.com/watch?v=83vFL6d57OI
 def process_image(image_path):
+  print("processing image")
   img = cv2.imread(image_path)
-
+  original = img
   gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   kernel = np.ones((1,1), np.uint8)
   img = cv2.dilate(gray_image, kernel, iterations=1)
@@ -27,19 +27,22 @@ def process_image(image_path):
   img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
   cv2.imwrite(image_path + "_thresh.png", img)
   result = pytesseract.image_to_string(Image.open(image_path + "_thresh.png"))
-  print(result)
-  os.system("say " + "'" + result + "'")
-  teardown()
+  
+  # print(result)
+  # os.system("say " + "'" + result + "'")
+  originalText = pytesseract.image_to_string(Image.open(image_path))
+  print(originalText)
+  os.system("say " + "'" + originalText + "'")
 
 def calibrate():
     global calibrated
     calibrated = True
 
-    print("calibrated" + str(calibrated))
+    print("calibrated!")
 
 # SETUP
-bpmThreshold = 65
-camera_port = 2
+bpmThreshold = 85
+camera_port = 1
 camera = cv2.VideoCapture(camera_port)
 ser = serial.Serial('/dev/cu.usbmodem1411')
 print (ser.name)
@@ -47,12 +50,10 @@ print (ser.name)
 t = Timer(15, calibrate)
 t.start()
 
-print("starting loop")
+print("listening to user heart rate")
 
 while True:
-
-
-  print("calibrated" + str(calibrated))
+  # print("calibrated" + str(calibrated))
   awake = True
   ret, frame = camera.read()
   cv2.imshow('window',frame)
@@ -63,30 +64,24 @@ while True:
   if k == ord('q'): #press 'q' to stop
     print('quitting')
     break
-  BPMSerial = ser.readline();
-  #print (BPM)
+  BPMSerial = ser.readline()
+  print("BPMSerial", BPMSerial)
   stringBPM = str(BPMSerial).split('\\')[0]
-  #print (stringBPM)
+  print("stringBPM", stringBPM)
   finalStringBPM = (stringBPM[2:])
-  print(finalStringBPM)
+  print("finalBPM", finalStringBPM)
   if finalStringBPM != '':
       BPM = int(finalStringBPM)
       awake = (BPM > bpmThreshold)
       print("Awake: " + str(awake))
 
   if not awake and calibrated:
-      print('user asleep, capturing image')
+      print('user is asleep, capturing image')
       cv2.imwrite('text.png', frame)
       break
-
-
-
-
-  # beats = int.from_bytes(BPM, byteorder='big')
-  # print(beats)
+  cv2.waitKey(500)
 
 
 teardown()
 
-
-process_image("camera_image.png")
+process_image("text.png")

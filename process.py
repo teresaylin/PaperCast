@@ -15,7 +15,6 @@ def teardown():
 #  camera.release()
 #  cv2.destroyAllWindows()
   ser.close()
-  quit()
 
 # Taken from https://www.youtube.com/watch?v=83vFL6d57OI
 def process_image(image_path):
@@ -55,7 +54,6 @@ def process_image(image_path):
   print "sanitized string:"
   print sanitized_str
   file.close()
-  teardown()
 
 def calibrate():
     global calibrated
@@ -77,21 +75,13 @@ t = Timer(15, calibrate)
 t.start()
 
 print "starting loop"
+awakeCount = 0
+asleepCount = 0
+lastStateAwake = True
 
 while True:
-
-
   print "calibrated" + str(calibrated)
   awake = True
-#  ret, frame = camera.read()
-#  cv2.imshow('window',frame)
-#  k = cv2.waitKey(1) & 0xFF
-#  if k == ord('a'):
-#    print('capturing an image')
-#    cv2.imwrite('camera_image.png', frame)
-#  if k == ord('q'): #press 'q' to stop
-#    print('quitting')
-#    break
   BPMSerial = ser.readline()
 #  print 'BPMSerial' + BPMSerial
   stringBPM = str(BPMSerial).split('\\')[0]
@@ -101,26 +91,22 @@ while True:
   print 'finalBPM' + finalStringBPM
 #  try:
   if finalStringBPM != '':
-      BPM = int(finalStringBPM)
-      awake = (BPM > bpmThreshold)
-      print "Awake: " + str(awake)
+    BPM = int(finalStringBPM)
+    awake = (BPM > bpmThreshold)
+    #awakeCount += 1 if awake else 0
+    #asleepCount += 0 if awake else 1
+    print "Awake: " + str(awake)
 #  except Exception as e:
 #      print e
-
-  if not awake and calibrated:
-      print 'user asleep, capturing image'
-#      cv2.imwrite('text.png', frame)
-      camera.capture('text.png')
-      break
+  if awake != lastStateAwake:
+    awakeCount = 1 if awake else 0
+    asleepCount = 0 if awake else 1
+  lastStateAwake = awake
+  if calibrated and asleepCount == 5:
+    print 'user asleep, capturing image'
+    camera.capture('text.png')
+    #process_image("text.png")
+    break
 #  cv2.waitKey(500)
 
-
-
-  # beats = int.from_bytes(BPM, byteorder='big')
-  # print(beats)
-
-
-teardown()
-
-
-#process_image("good_textonly.jpg")
+ser.close()

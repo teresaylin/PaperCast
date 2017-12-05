@@ -92,50 +92,50 @@ while True:
 #  print 'stringBPM' + stringBPM
   finalStringBPM = stringBPM
   print 'finalBPM: ' + finalStringBPM
-  # realBPM = 0
-  # try:
-  #   # if finalStringBPM != '':
-  #   BPM = int(finalStringBPM)
-  #   if BPM < 80:
-  #     bpmCalibratedCount += 1
-  #     realBPM = BPM
-  #     if not bpmCalibrated and bpmCalibratedCount == 15:
-  #       bpmCalibrated = True
-  #   else:
-  #     bpmCalibratedCount = 0
-  # except Exception as e:
-  #   print e
+  realBPM = 0
+  try:
+    # if finalStringBPM != '':
+    BPM = int(finalStringBPM)
+    if BPM < 80:
+      bpmCalibratedCount += 1
+      realBPM = BPM
+      if not bpmCalibrated and bpmCalibratedCount == 15:
+        bpmCalibrated = True
+    else:
+      bpmCalibratedCount = 0
+  except Exception as e:
+    print e
 
-  # if calibrated and bpmCalibrated:
-  #   # asleep heart rate is typically 10-15 beats per minute lower than awake and resting heart rate
-  #   awake = (realBPM > (awakeAvg-10)) if awakeAvgCalculated else (realBPM > tempBPMThreshold)
-  #   print "Awake: " + str(awake)
+  if calibrated and bpmCalibrated:
+    # asleep heart rate is typically 10-15 beats per minute lower than awake and resting heart rate
+    awake = (realBPM > (awakeAvg-10)) if awakeAvgCalculated else (realBPM > tempBPMThreshold)
+    print "Awake: " + str(awake)
 
-  #   # if awakeAvg heartrate has not been calculated yet, calculate it
-  #   if awake and not awakeAvgCalculated:
-  #     awakeTotal += realBPM
+    # if awakeAvg heartrate has not been calculated yet, calculate it
+    if awake and not awakeAvgCalculated:
+      awakeTotal += realBPM
 
-  #   if awake != lastStateAwake:
-  #     awakeCount = 1 if awake else 0
-  #     asleepCount = 0 if awake else 1
-  #     if not awakeAvgCalculated:
-  #       awakeTotal = 0
-  #   else:
-  #     awakeCount += 1 if awake else 0
-  #     asleepCount += 0 if awake else 1
-  #   lastStateAwake = awake
+    if awake != lastStateAwake:
+      awakeCount = 1 if awake else 0
+      asleepCount = 0 if awake else 1
+      if not awakeAvgCalculated:
+        awakeTotal = 0
+    else:
+      awakeCount += 1 if awake else 0
+      asleepCount += 0 if awake else 1
+    lastStateAwake = awake
 
-  #   if awake and not awakeAvgCalculated:
-  #     awakeAvg = awakeTotal / awakeCount
-  #     if awakeCount == 20:
-  #       awakeAvgCalculated = True
-  #       print "Average awake heart rate calcalated: " + str(awakeAvg)
+    if awake and not awakeAvgCalculated:
+      awakeAvg = awakeTotal / awakeCount
+      if awakeCount == 20:
+        awakeAvgCalculated = True
+        print "Average awake heart rate calcalated: " + str(awakeAvg)
 
-  #   if asleepCount == 10:
-  #     print 'user asleep, capturing image'
-  #     camera.capture('text.png')
-  #     process_image("text.png")
-  #     break
+    if asleepCount == 10:
+      print 'user asleep, capturing image'
+      camera.capture('text.png')
+      process_image("text.png")
+      break
 
   cv2.waitKey(500) 
 

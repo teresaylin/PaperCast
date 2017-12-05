@@ -80,6 +80,7 @@ awakeTotal = 0
 awakeAvg = 0
 print "starting loop"
 bpmCalibrated = False
+bpmCalibratedCount = 0
 
 while True:
   print "calibrated: " + str(calibrated)
@@ -95,9 +96,13 @@ while True:
   try:
     # if finalStringBPM != '':
     BPM = int(finalStringBPM)
-    if BPM < 100:
-      bpmCalibrated = True
+    if BPM < 80:
+      bpmCalibratedCount += 1
       realBPM = BPM
+      if not bpmCalibrated and bpmCalibratedCount == 15:
+        bpmCalibrated = True
+    else:
+      bpmCalibratedCount = 0
   except Exception as e:
     print e
 

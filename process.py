@@ -6,7 +6,8 @@ import os
 import serial
 from threading import Timer
 import picamera
-import pyttsx
+import enchant
+import re
 
 calibrated = False
 
@@ -22,37 +23,55 @@ def process_image(image_path):
 
   gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   kernel = np.ones((1,1), np.uint8)
-  img = cv2.dilate(gray_image, kernel, iterations=1)
-  img = cv2.erode(img, kernel, iterations=1)
+  dilated_img = cv2.dilate(gray_image, kernel, iterations=1)
+  eroded_img = cv2.erode(dilated_img, kernel, iterations=1)
 
-  cv2.imwrite(image_path + "_removed_noise.png", img)
-  img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-  cv2.imwrite(image_path + "_thresh.png", img)
+  cv2.imwrite(image_path + "_removed_noise.png", eroded_img)
+  thresh_img = cv2.adaptiveThreshold(eroded_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+  cv2.imwrite(image_path + "_thresh.png", thresh_img)
+  print "extracting text from image"
   result = pytesseract.image_to_string(Image.open(image_path + "_thresh.png"))
-#  print 'result text: ' + result
-  # engine.say(result)
-  # engine.runAndWait()
+  print 'result text: ' + result
 
-  originalText = pytesseract.image_to_string(Image.open(image_path))
-  print 'original text: ' + originalText
-  engine.say(originalText)
-  engine.runAndWait()
+#  originalText = pytesseract.image_to_string(Image.open(image_path))
+#  print 'original text: ' + originalText
+  words = result.split()  #splitting by whitespace, newlines, tabs, etc
+  file = open("textChunks.txt", "w+")
+
+  sanitized_str = ""
+  current_sentence = ""
+  pattern = re.compile("[?.,-]")
+  print "converting text to speech"
+  for word in words:
+    if d.check(word):
+      sanitized_str += word + " "
+      current_sentence += word + " "
+      if pattern.match(word):
+        encoded_str = current_sentence.encode('utf-8').replace('"', "'")
+        print encoded_str
+        file.write(encoded_str + "\n")
+        os.system('espeak "' + encoded_str + '"')
+        current_sentence = ""
+  print "sanitized string:"
+  print sanitized_str
+  file.close()
   teardown()
 
 def calibrate():
     global calibrated
     calibrated = True
-
     print "calibrated" + str(calibrated)
 
 # SETUP
-engine = pyttsx.init()
+d = enchant.Dict("en_US")
 bpmThreshold = 65
 #camera_port = 2
 #camera = cv2.VideoCapture(camera_port)
 camera = picamera.PiCamera()
 ser = serial.Serial('/dev/ttyACM0')
 print ser.name
+
+process_image("good_textonly.png")
 
 t = Timer(15, calibrate)
 t.start()
@@ -104,4 +123,4 @@ while True:
 teardown()
 
 
-process_image("good_textonly.jpg")
+#process_image("good_textonly.jpg")

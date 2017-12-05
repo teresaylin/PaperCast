@@ -58,54 +58,71 @@ def process_image(image_path):
 def calibrate():
     global calibrated
     calibrated = True
-    print "calibrated" + str(calibrated)
+    print "calibrated: " + str(calibrated)
 
 # SETUP
 d = enchant.Dict("en_US")
-bpmThreshold = 65
-#camera_port = 2
-#camera = cv2.VideoCapture(camera_port)
 camera = picamera.PiCamera()
 ser = serial.Serial('/dev/ttyACM0')
 print ser.name
 
-process_image("good_textonly.png")
+# process_image("good_textonly.png")
 
 t = Timer(15, calibrate)
 t.start()
 
-print "starting loop"
+tempBPMThreshold = 55
 awakeCount = 0
 asleepCount = 0
 lastStateAwake = True
+awakeAvgCalculated = False
+awakeTotal = 0
+awakeAvg = 0
+print "starting loop"
 
 while True:
-  print "calibrated" + str(calibrated)
+  print "calibrated: " + str(calibrated)
   awake = True
   BPMSerial = ser.readline()
 #  print 'BPMSerial' + BPMSerial
   stringBPM = str(BPMSerial).split('\\')[0]
 #  print 'stringBPM' + stringBPM
-#  finalStringBPM = (stringBPM[2:])
   finalStringBPM = stringBPM
   print 'finalBPM' + finalStringBPM
-#  try:
-  if finalStringBPM != '':
+  try:
+    # if finalStringBPM != '':
     BPM = int(finalStringBPM)
-    awake = (BPM > bpmThreshold)
-    #awakeCount += 1 if awake else 0
-    #asleepCount += 0 if awake else 1
+    # asleep heart rate is typically 10-15 beats per minute lower than awake and resting heart rate
+    awake = (BPM > (awakeAvg-10)) if awakeAvgCalculated else (BPM > tempBPMThreshold)
     print "Awake: " + str(awake)
-#  except Exception as e:
-#      print e
+
+    # if awakeAvg heartrate has not been calculated yet, calculate it
+    if awake and not awakeAvgCalculated:
+      awakeTotal += BPM
+
+  except Exception as e:
+    print e
+
   if awake != lastStateAwake:
     awakeCount = 1 if awake else 0
     asleepCount = 0 if awake else 1
+    if not awakeAvgCalculated:
+      awakeTotal = 0
+  else:
+    awakeCount += 1 if awake else 0
+    asleepCount += 0 if awake else 1
   lastStateAwake = awake
+
+  if awake and not awakeAvgCalculated:
+    awakeAvg = awakeTotal / awakeCount
+    if awakeCount == 10:
+      awakeAvgCalculated = True
+      print "Average awake heart rate calcalated: " + str(awakeAvg)
+
   if calibrated and asleepCount == 5:
     print 'user asleep, capturing image'
     camera.capture('text.png')
-    #process_image("text.png")
+    process_image("text.png")
     break
 #  cv2.waitKey(500)
 

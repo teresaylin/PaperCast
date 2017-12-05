@@ -79,30 +79,36 @@ awakeAvgCalculated = False
 awakeTotal = 0
 awakeAvg = 0
 print "starting loop"
+bpmCalibrated = False
 
 while True:
   print "calibrated: " + str(calibrated)
-  if calibrated:
-    awake = True
-    BPMSerial = ser.readline()
-  #  print 'BPMSerial' + BPMSerial
-    stringBPM = str(BPMSerial).split('\\')[0]
-  #  print 'stringBPM' + stringBPM
-    finalStringBPM = stringBPM
-    print 'finalBPM' + finalStringBPM
-    try:
-      # if finalStringBPM != '':
-      BPM = int(finalStringBPM)
-      # asleep heart rate is typically 10-15 beats per minute lower than awake and resting heart rate
-      awake = (BPM > (awakeAvg-10)) if awakeAvgCalculated else (BPM > tempBPMThreshold)
-      print "Awake: " + str(awake)
 
-      # if awakeAvg heartrate has not been calculated yet, calculate it
-      if awake and not awakeAvgCalculated:
-        awakeTotal += BPM
+  awake = True
+  BPMSerial = ser.readline()
+#  print 'BPMSerial' + BPMSerial
+  stringBPM = str(BPMSerial).split('\\')[0]
+#  print 'stringBPM' + stringBPM
+  finalStringBPM = stringBPM
+  print 'finalBPM' + finalStringBPM
+  realBPM = 0
+  try:
+    # if finalStringBPM != '':
+    BPM = int(finalStringBPM)
+    if BPM < 100:
+      bpmCalibrated = True
+      realBPM = BPM
+  except Exception as e:
+    print e
 
-    except Exception as e:
-      print e
+  if calibrated and bpmCalibrated:
+    # asleep heart rate is typically 10-15 beats per minute lower than awake and resting heart rate
+    awake = (realBPM > (awakeAvg-10)) if awakeAvgCalculated else (realBPM > tempBPMThreshold)
+    print "Awake: " + str(awake)
+
+    # if awakeAvg heartrate has not been calculated yet, calculate it
+    if awake and not awakeAvgCalculated:
+      awakeTotal += realBPM
 
     if awake != lastStateAwake:
       awakeCount = 1 if awake else 0
@@ -116,15 +122,16 @@ while True:
 
     if awake and not awakeAvgCalculated:
       awakeAvg = awakeTotal / awakeCount
-      if awakeCount == 10:
+      if awakeCount == 20:
         awakeAvgCalculated = True
         print "Average awake heart rate calcalated: " + str(awakeAvg)
 
-    if asleepCount == 5:
+    if asleepCount == 10:
       print 'user asleep, capturing image'
       camera.capture('text.png')
       process_image("text.png")
       break
-#  cv2.waitKey(500) 
+
+  cv2.waitKey(500) 
 
 ser.close()

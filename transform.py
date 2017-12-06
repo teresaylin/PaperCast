@@ -1,7 +1,9 @@
 import numpy as np
 import cv2
 
-image = cv2.imread('cleanText.png')
+image = cv2.imread('good.png')
+warped = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+warped = cv2.adaptiveThreshold(warped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 10)
 
 
 def order_points(pts):
@@ -84,6 +86,7 @@ cv2.imshow("Edged", edged)
 img, cnts, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
 
+rectangleShape = False
 # loop over the contours
 for c in cnts:
 	# approximate the contour
@@ -94,21 +97,31 @@ for c in cnts:
 	# can assume that we have found our screen
 	if len(approx) == 4:
 		screenCnt = approx
+		rectangleShape = True
 		break
  
+print("detected contours")
 # show the contour (outline) of the piece of paper
 #print "STEP 2: Find contours of paper"
-outline = image.copy()
-cv2.drawContours(outline, [screenCnt], -1, (0, 255, 0), 2)
-cv2.imshow("Outline", outline)
 
-print(screenCnt)
-warped = four_point_transform(image, screenCnt.reshape(4, 2))
-print("done warping")
+if rectangleShape:
+	outline = image.copy()
+	cv2.drawContours(outline, [screenCnt], -1, (0, 255, 0), 2)
+	cv2.imshow("Outline", outline)
 
-#warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
-# warped = threshold_adaptive(warped, 251, offset = 10)
-# warped = warped.astype("uint8") * 255
+	print(screenCnt)
+	warped = four_point_transform(orig, screenCnt.reshape(4, 2) / r)
+	print("done warping")
+
+	warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
+	warped = cv2.adaptiveThreshold(warped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 41, 7)
+	
+
+	
+	
+#warped = threshold_adaptive(warped, 251, offset = 10)
+# 
+# warped = cv2.bitwise_not(warped)
  
 # show the original and scanned images
 #print "STEP 3: Apply perspective transform"

@@ -26,7 +26,7 @@ def process_image(image_path):
   eroded_img = cv2.erode(dilated_img, kernel, iterations=1)
 
   cv2.imwrite(image_path + "_removed_noise.png", eroded_img)
-  thresh_img = cv2.adaptiveThreshold(eroded_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+  thresh_img = cv2.adaptiveThreshold(eroded_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 1, 2)
   cv2.imwrite(image_path + "_thresh.png", thresh_img)
   print "extracting text from image"
   result = pytesseract.image_to_string(Image.open(image_path + "_thresh.png"))

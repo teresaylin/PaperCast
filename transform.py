@@ -1,6 +1,10 @@
 import numpy as np
 import cv2
 import pytesseract
+from PIL import Image
+from gtts import gTTS
+import os
+
 
 inputImage = cv2.imread('cleanText.png')
 
@@ -11,7 +15,7 @@ def transform_image(image):
 	kernel = np.ones((1,1), np.uint8)
 	dilated = cv2.dilate(gray, kernel, iterations=1)
 	eroded = cv2.erode(dilated, kernel, iterations=1)
-	final = cv2.adaptiveThreshold(eroded, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 10)
+	final = cv2.adaptiveThreshold(eroded, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 9)
 
 	ratio = image.shape[0] / 500.0
 	r = 500.0 / image.shape[1]
@@ -52,10 +56,6 @@ def transform_image(image):
 		final = cv2.adaptiveThreshold(warped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 15)
 
 	return final
-
-
-
-
 
 def order_points(pts):
 	# initialzie a list of coordinates that will be ordered
@@ -121,6 +121,13 @@ def four_point_transform(image, pts):
 
 final = transform_image(inputImage)
 cv2.imwrite('warped.png', final)
+
+text = pytesseract.image_to_string(Image.open("warped.png"))
+
+tts = gTTS(text=text, lang='en')
+tts.save("speech.mp3")
+os.system("mpg321 speech.mp3")
+
 
 # 	if len(approx) == 4:
 # 		screenCnt = approx

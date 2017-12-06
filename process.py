@@ -8,65 +8,21 @@ from threading import Timer
 import picamera
 import enchant
 import re
+from gtts import gTTS
+import os
+import transform
 
 def getVariables():
-  #global bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str
+  	global bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str
 	return (bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str)
-
-
-# Taken from https://www.youtube.com/watch?v=83vFL6d57OI
-def process_image(image_path):
-  #global image_processed, d, sanitized_str
-  img = cv2.imread(image_path)
-  image_processed = False
-
-  gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-  kernel = np.ones((1,1), np.uint8)
-  dilated_img = cv2.dilate(gray_image, kernel, iterations=1)
-  eroded_img = cv2.erode(dilated_img, kernel, iterations=1)
-
-  cv2.imwrite(image_path + "_removed_noise.png", eroded_img)
-  thresh_img = cv2.adaptiveThreshold(eroded_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 1, 2)
-  cv2.imwrite(image_path + "_thresh.png", thresh_img)
-  print "extracting text from image"
-  result = pytesseract.image_to_string(Image.open(image_path + "_thresh.png"))
-  print 'result text: ' + result
-
-#  originalText = pytesseract.image_to_string(Image.open(image_path))
-#  print 'original text: ' + originalText
-  words = result.split()  #splitting by whitespace, newlines, tabs, etc
-  file = open("textChunks.txt", "w+")
-
-  #sanitized_str = ""
-  current_sentence = ""
-  pattern = re.compile("[?.,-]")
-  print "converting text to speech"
-  for word in words:
-    if d.check(word):
-      sanitized_str += word + " "
-      current_sentence += word + " "
-      if pattern.match(word):
-        encoded_str = current_sentence.encode('utf-8').replace('"', "'")
-        print encoded_str
-        file.write(encoded_str + "\n")
-        os.system('espeak "' + encoded_str + '"')
-        current_sentence = ""
-  print "sanitized string:"
-  print sanitized_str
-  image_processed = True
-  file.close()
 
 def calibrate():
     global calibrated
     calibrated = True
     print "calibrated: " + str(calibrated)
-    # return calibrated
 
 # SETUP
 d = enchant.Dict("en_US")
-camera = picamera.PiCamera()
-ser = serial.Serial('/dev/ttyACM0')
-print ser.name
 calibrated = False
 sanitized_str = ""
 image_processed = False
@@ -85,12 +41,16 @@ bpmCalibratedCount = 0
 realBPM = 0
 
 def main():
-  #global camera, ser, calibrated, tempBPMThreshold, awakeCount, asleepCount, lastStateAwake, awakeAvgCalculated, awakeTotal, awakeAvg, bpmCalibrated, bpmCalibratedCount, realBPM
+	camera = picamera.PiCamera()
+	ser = serial.Serial('/dev/ttyACM0')
+	print ser.name
 
-  print "starting loop"
+  	global calibrated, tempBPMThreshold, awakeCount, asleepCount, lastStateAwake, awakeAvgCalculated, awakeTotal, awakeAvg, bpmCalibrated, bpmCalibratedCount, realBPM
 
-  t = Timer(15, calibrate)
-  t.start()
+	print "starting loop"
+
+	t = Timer(15, calibrate)
+ 	t.start()
 	
 	while True:
 	  print "calibrated: " + str(calibrated)
@@ -115,7 +75,7 @@ def main():
 	      bpmCalibratedCount = 0
 	  except Exception as e:
 	    print e
-	
+	  print "bpm calibrated: " + str(bpmCalibrated)
 	  if calibrated and bpmCalibrated:
 	    # asleep heart rate is typically 10-15 beats per minute lower than awake and resting heart rate
 	    awake = (realBPM > (awakeAvg-10)) if awakeAvgCalculated else (realBPM > tempBPMThreshold)
@@ -141,10 +101,21 @@ def main():
 	        awakeAvgCalculated = True
 	        print "Average awake heart rate calcalated: " + str(awakeAvg)
 	
-	    if asleepCount == 10:
+	   #if asleepCount == 10:
+            if calibrated:
+	      image_processed = False
 	      print 'user asleep, capturing image'
 	      camera.capture('text.png')
-	      process_image("text.png")
+	      inputImage = cv2.imread('text.png')
+	      finalImage = transform.transform_image(inputImage)
+	      cv2.imwrite('processed.png', finalImage)
+
+	      sanitized_str = pytesseract.image_to_string(Image.open("warped.png"))
+              print "sanitized string: " + sanitized_str
+	      tts = gTTS(text=sanitized_str, lang='en')
+	      tts.save("speech.mp3")
+	      image_processed = True
+	      os.system("mpg321 speech.mp3")
 	      break
 	
 	  # cv2.waitKey(500) 

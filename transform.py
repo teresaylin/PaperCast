@@ -6,7 +6,7 @@ from gtts import gTTS
 import os
 
 
-inputImage = cv2.imread('cleanText.png')
+#inputImage = cv2.imread('cleanText.png')
 
 
 def transform_image(image):
@@ -27,7 +27,7 @@ def transform_image(image):
 	gray = cv2.GaussianBlur(gray, (5, 5), 0)
 	edged = cv2.Canny(gray, 75, 200)
 
-	img, cnts, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+	(cnts, other) = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 	cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
 
 	rectangleShape = False
@@ -115,28 +115,16 @@ def four_point_transform(image, pts):
 	M = cv2.getPerspectiveTransform(rect, dst)
 	warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
  
-	# return the warped image
 	return warped 
-# perform the actual resizing of the image and show it
 
-final = transform_image(inputImage)
-cv2.imwrite('warped.png', final)
+#final = transform_image(inputImage)
+#cv2.imwrite('warped.png', final)
 
-text = pytesseract.image_to_string(Image.open("warped.png"))
+#text = pytesseract.image_to_string(Image.open("warped.png"))
 
-tts = gTTS(text=text, lang='en')
-tts.save("speech.mp3")
-os.system("mpg321 speech.mp3")
+#tts = gTTS(text=text, lang='en')
 
+#tts.save("speech.mp3")
 
-# 	if len(approx) == 4:
-# 		screenCnt = approx
-# 		break
- 
-# show the contour (outline) of the piece of paper
-#print "STEP 2: Find contours of paper"
-# cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
-# cv2.imshow("Outline", image)
+#os.system("mpg321 speech.mp3")
 
-
-# 

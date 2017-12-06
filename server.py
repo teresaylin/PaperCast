@@ -1,11 +1,12 @@
 import SimpleHTTPServer
 import SocketServer
 from process import main, getVariables
+from threading import Timer
 
 class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def do_GET(s):
     (bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str) = getVariables()
-    print 'cb: ' + bpmCalibrated
+    print 'cb: ' + str(bpmCalibrated)
     """Respond to a GET request."""
     s.send_response(200)
     s.send_header("Content-type", "text/html")
@@ -21,13 +22,15 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 Handler = MyRequestHandler
 server = SocketServer.TCPServer(('192.168.43.152', 8000), Handler)
+print "connected to server"
+t = Timer(5, main)
+t.start()
 
 try:
 	server.serve_forever()
 except KeyboardInterrupt:
 	server.shutdown()
 	server.server_close()
-	ser.close()
   	print "keyboard interrupt"
 	pass
 

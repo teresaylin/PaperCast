@@ -1,6 +1,6 @@
 import SimpleHTTPServer
 import SocketServer
-from process import getVariables
+from process import main, getVariables
 
 class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def do_GET(s):

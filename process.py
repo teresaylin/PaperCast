@@ -10,11 +10,13 @@ import enchant
 import re
 
 def getVariables():
+  #global bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str
 	return (bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str)
 
 
 # Taken from https://www.youtube.com/watch?v=83vFL6d57OI
 def process_image(image_path):
+  #global image_processed, d, sanitized_str
   img = cv2.imread(image_path)
   image_processed = False
 
@@ -54,44 +56,41 @@ def process_image(image_path):
   image_processed = True
   file.close()
 
-def calibrate(calibrated):
-    #global calibrated
+def calibrate():
+    global calibrated
     calibrated = True
     print "calibrated: " + str(calibrated)
-    return calibrated
+    # return calibrated
 
 # SETUP
-def getGlobalVars():
-	calibrated = False
-	sanitized_str = ""
-	image_processed = False
+d = enchant.Dict("en_US")
+camera = picamera.PiCamera()
+ser = serial.Serial('/dev/ttyACM0')
+print ser.name
+calibrated = False
+sanitized_str = ""
+image_processed = False
+
+# process_image("good_textonly.png")
+
+tempBPMThreshold = 55
+awakeCount = 0
+asleepCount = 0
+lastStateAwake = True
+awakeAvgCalculated = False
+awakeTotal = 0
+awakeAvg = 0
+bpmCalibrated = False
+bpmCalibratedCount = 0
+realBPM = 0
 
 def main():
-	d = enchant.Dict("en_US")
-	camera = picamera.PiCamera()
-	ser = serial.Serial('/dev/ttyACM0')
-	print ser.name
-	calibrated = False
-	sanitized_str = ""
-	image_processed = False
+  #global camera, ser, calibrated, tempBPMThreshold, awakeCount, asleepCount, lastStateAwake, awakeAvgCalculated, awakeTotal, awakeAvg, bpmCalibrated, bpmCalibratedCount, realBPM
 
-	# process_image("good_textonly.png")
-	
-	t = Timer(15, calibrate, [calibrated])
-	t.start()
-	
-	tempBPMThreshold = 55
-	awakeCount = 0
-	asleepCount = 0
-	lastStateAwake = True
-	awakeAvgCalculated = False
-	awakeTotal = 0
-	awakeAvg = 0
-	print "starting loop"
-	bpmCalibrated = False
-	bpmCalibratedCount = 0
-	realBPM = 0
-	print "starting loop"
+  print "starting loop"
+
+  t = Timer(15, calibrate)
+  t.start()
 	
 	while True:
 	  print "calibrated: " + str(calibrated)
@@ -148,7 +147,7 @@ def main():
 	      process_image("text.png")
 	      break
 	
-	  cv2.waitKey(500) 
+	  # cv2.waitKey(500) 
 	
 	ser.close()
 

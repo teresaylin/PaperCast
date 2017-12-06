@@ -13,13 +13,13 @@ import os
 import transform
 
 def getVariables():
-  	global bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str
+  global bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str
 	return (bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str)
 
 def calibrate():
-    global calibrated
-    calibrated = True
-    print "calibrated: " + str(calibrated)
+  global calibrated
+  calibrated = True
+  print "calibrated: " + str(calibrated)
 
 # SETUP
 d = enchant.Dict("en_US")
@@ -45,7 +45,7 @@ def main():
 	ser = serial.Serial('/dev/ttyACM0')
 	print ser.name
 
-  	global calibrated, tempBPMThreshold, awakeCount, asleepCount, lastStateAwake, awakeAvgCalculated, awakeTotal, awakeAvg, bpmCalibrated, bpmCalibratedCount, realBPM
+  global calibrated, tempBPMThreshold, awakeCount, asleepCount, lastStateAwake, awakeAvgCalculated, awakeTotal, awakeAvg, bpmCalibrated, bpmCalibratedCount, realBPM
 
 	print "starting loop"
 
@@ -102,21 +102,21 @@ def main():
 	        print "Average awake heart rate calcalated: " + str(awakeAvg)
 	
 	   #if asleepCount == 10:
-            if calibrated:
-	      image_processed = False
-	      print 'user asleep, capturing image'
-	      camera.capture('text.png')
-	      inputImage = cv2.imread('text.png')
-	      finalImage = transform.transform_image(inputImage)
-	      cv2.imwrite('processed.png', finalImage)
+    if calibrated:
+      image_processed = False
+      print 'user asleep, capturing image'
+      # camera.capture('text.png')
+      inputImage = cv2.imread('goodText.png')
+      finalImage = transform.transform_image(inputImage)
+      cv2.imwrite('processed.png', finalImage)
 
-	      sanitized_str = pytesseract.image_to_string(Image.open("warped.png"))
-              print "sanitized string: " + sanitized_str
-	      tts = gTTS(text=sanitized_str, lang='en')
-	      tts.save("speech.mp3")
-	      image_processed = True
-	      os.system("mpg321 speech.mp3")
-	      break
+      sanitized_str = pytesseract.image_to_string(Image.open("warped.png"))
+      print "sanitized string: " + sanitized_str
+      tts = gTTS(text=sanitized_str, lang='en')
+      tts.save("speech.mp3")
+      image_processed = True
+      os.system("mpg321 speech.mp3")
+      break
 	
 	  # cv2.waitKey(500) 
 	

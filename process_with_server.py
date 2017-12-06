@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import SimpleHTTPServer
 import SocketServer
 import cv2
@@ -13,6 +12,8 @@ import enchant
 import re
 
 calibrated = False
+sanitized_str = ""
+image_processed = False
 
 def teardown():
 #  camera.release()
@@ -22,6 +23,7 @@ def teardown():
 # Taken from https://www.youtube.com/watch?v=83vFL6d57OI
 def process_image(image_path):
   img = cv2.imread(image_path)
+  image_processed = False
 
   gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   kernel = np.ones((1,1), np.uint8)
@@ -40,7 +42,7 @@ def process_image(image_path):
   words = result.split()  #splitting by whitespace, newlines, tabs, etc
   file = open("textChunks.txt", "w+")
 
-  sanitized_str = ""
+  # sanitized_str = ""
   current_sentence = ""
   pattern = re.compile("[?.,-]")
   print "converting text to speech"
@@ -56,6 +58,7 @@ def process_image(image_path):
         current_sentence = ""
   print "sanitized string:"
   print sanitized_str
+  image_processed = True
   file.close()
 
 def calibrate():
@@ -81,20 +84,13 @@ lastStateAwake = True
 awakeAvgCalculated = False
 awakeTotal = 0
 awakeAvg = 0
-print "starting loop"
 bpmCalibrated = False
 bpmCalibratedCount = 0
+realBPM = 0
+print "starting loop"
 
-
-class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
- def do_GET(s):
-  """Respond to a GET request."""
-  s.send_response(200)
-  s.send_header("Content-type", "text/html")
-  s.end_headers()
-#while True:
+while True:
   print "calibrated: " + str(calibrated)
-
   awake = True
   BPMSerial = ser.readline()
 #  print 'BPMSerial' + BPMSerial
@@ -102,9 +98,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 #  print 'stringBPM' + stringBPM
   finalStringBPM = stringBPM
   print 'finalBPM: ' + finalStringBPM
-
-  s.wfile.write(stringBPM)
-  realBPM = 0
+  # realBPM = 0
   try:
     # if finalStringBPM != '':
     BPM = int(finalStringBPM)
@@ -119,7 +113,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       bpmCalibratedCount = 0
   except Exception as e:
     print e
-  return "nope"
+  # return "nope"
 
   if calibrated and bpmCalibrated:
     # asleep heart rate is typically 10-15 beats per minute lower than awake and resting heart rate
@@ -153,6 +147,20 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       
   #cv2.waitKey(500) 
 
+class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+  def do_GET(s):
+    """Respond to a GET request."""
+    s.send_response(200)
+    s.send_header("Content-type", "text/html")
+    s.end_headers()
+    if bpmCalibrated and calibrated:
+      s.wfile.write("BPM: " + str(realBPM))
+    else:
+      s.wfile.write("BPM: NOT CALIBRATED YET")
+    if awakeAvgCalculated:
+      s.wfile.write("Average awake heart rate: " + str(awakeAvg))
+    if image_processed:
+      s.wfile.write("Reading text: " + sanitized_str)
 
 Handler = MyRequestHandler
 server = SocketServer.TCPServer(('192.168.43.152', 8000), Handler)
@@ -163,4 +171,5 @@ except KeyboardInterrupt:
 	server.shutdown()
 	server.server_close()
 	ser.close()
+  print "keyboard interrupt"
 	pass

@@ -1,9 +1,60 @@
 import numpy as np
 import cv2
+import pytesseract
 
-image = cv2.imread('good.png')
-warped = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-warped = cv2.adaptiveThreshold(warped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 10)
+inputImage = cv2.imread('cleanText.png')
+
+
+def transform_image(image):
+	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+	kernel = np.ones((1,1), np.uint8)
+	dilated = cv2.dilate(gray, kernel, iterations=1)
+	eroded = cv2.erode(dilated, kernel, iterations=1)
+	final = cv2.adaptiveThreshold(eroded, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 10)
+
+	ratio = image.shape[0] / 500.0
+	r = 500.0 / image.shape[1]
+	dim = (500, int(image.shape[0] * r))
+	orig = image.copy()
+	image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+
+	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	gray = cv2.GaussianBlur(gray, (5, 5), 0)
+	edged = cv2.Canny(gray, 75, 200)
+
+	img, cnts, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+	cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
+
+	rectangleShape = False
+	# loop over the contours
+	for c in cnts:
+		# approximate the contour
+		peri = cv2.arcLength(c, True)
+		approx = cv2.approxPolyDP(c, 0.02 * peri, True)
+	 
+		# if our approximated contour has four points, then we
+		# can assume that we have found our screen
+		if len(approx) == 4:
+			screenCnt = approx
+			rectangleShape = True
+			break
+	 
+
+	if rectangleShape:
+		outline = image.copy()
+		cv2.drawContours(outline, [screenCnt], -1, (0, 255, 0), 2)
+		cv2.imshow("Outline", outline)
+
+		warped = four_point_transform(orig, screenCnt.reshape(4, 2) / r)
+
+		warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
+		final = cv2.adaptiveThreshold(warped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 15)
+
+	return final
+
+
+
 
 
 def order_points(pts):
@@ -68,79 +119,9 @@ def four_point_transform(image, pts):
 	return warped 
 # perform the actual resizing of the image and show it
 
-ratio = image.shape[0] / 500.0
-r = 500.0 / image.shape[1]
-dim = (500, int(image.shape[0] * r))
-orig = image.copy()
-image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+final = transform_image(inputImage)
+cv2.imwrite('warped.png', final)
 
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-gray = cv2.GaussianBlur(gray, (5, 5), 0)
-edged = cv2.Canny(gray, 75, 200)
-
-#print "STEP 1: Edge Detection"
-cv2.imshow("Image", image)
-cv2.imshow("Edged", edged)
-
-
-img, cnts, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
-
-rectangleShape = False
-# loop over the contours
-for c in cnts:
-	# approximate the contour
-	peri = cv2.arcLength(c, True)
-	approx = cv2.approxPolyDP(c, 0.02 * peri, True)
- 
-	# if our approximated contour has four points, then we
-	# can assume that we have found our screen
-	if len(approx) == 4:
-		screenCnt = approx
-		rectangleShape = True
-		break
- 
-print("detected contours")
-# show the contour (outline) of the piece of paper
-#print "STEP 2: Find contours of paper"
-
-if rectangleShape:
-	outline = image.copy()
-	cv2.drawContours(outline, [screenCnt], -1, (0, 255, 0), 2)
-	cv2.imshow("Outline", outline)
-
-	print(screenCnt)
-	warped = four_point_transform(orig, screenCnt.reshape(4, 2) / r)
-	print("done warping")
-
-	warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
-	warped = cv2.adaptiveThreshold(warped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 41, 7)
-	
-
-	
-	
-#warped = threshold_adaptive(warped, 251, offset = 10)
-# 
-# warped = cv2.bitwise_not(warped)
- 
-# show the original and scanned images
-#print "STEP 3: Apply perspective transform"
-# cv2.imshow("Original", )
-cv2.imshow("Scanned", warped)
-
-cv2.imwrite('warped.png', warped)
-
-cv2.waitKey(0)
-#print cnts
- 
-# # loop over the contours
-# for c in cnts:
-# 	# approximate the contour
-# 	peri = cv2.arcLength(c, True)
-# 	approx = cv2.approxPolyDP(c, 0.02 * peri, True)
- 
-# 	# if our approximated contour has four points, then we
-# 	# can assume that we have found our screen
 # 	if len(approx) == 4:
 # 		screenCnt = approx
 # 		break

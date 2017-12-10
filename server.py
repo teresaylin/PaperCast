@@ -17,8 +17,8 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       s.wfile.write("BPM: NOT CALIBRATED YET")
     if awakeAvgCalculated:
       s.wfile.write("Average awake heart rate: " + str(awakeAvg))
-    if image_processed:
-      s.wfile.write("Reading text: " + sanitized_str)
+    #if image_processed:
+    s.wfile.write("Reading text: " + sanitized_str)
 
 Handler = MyRequestHandler
 server = SocketServer.TCPServer(('192.168.43.152', 8000), Handler)

@@ -4,24 +4,34 @@ import pytesseract
 from PIL import Image
 from gtts import gTTS
 import os
+import picamera
 
+#camera = picamera.PiCamera()
 
-#inputImage = cv2.imread('cleanText.png')
+#camera.resolution =(2592, 1944)
+
+#camera.capture('text.png')
+#print "image captured"
+#inputImage = cv2.imread('text.png')
+#print "reading image"
 
 
 def transform_image(image):
+	orig = image.copy()
+	print "copied original"
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 	kernel = np.ones((1,1), np.uint8)
 	dilated = cv2.dilate(gray, kernel, iterations=1)
 	eroded = cv2.erode(dilated, kernel, iterations=1)
-	final = cv2.adaptiveThreshold(eroded, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 9)
-
+	
+	#cv2.imwrite('uncropped.png', final)
 	ratio = image.shape[0] / 500.0
 	r = 500.0 / image.shape[1]
 	dim = (500, int(image.shape[0] * r))
-	orig = image.copy()
+	#
 	image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+	print "resized image"
 
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	gray = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -29,6 +39,7 @@ def transform_image(image):
 
 	(cnts, other) = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 	cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
+	print "found contours"
 
 	rectangleShape = False
 	# loop over the contours
@@ -46,6 +57,7 @@ def transform_image(image):
 	 
 
 	if rectangleShape:
+		print "found rectangle"
 		outline = image.copy()
 		cv2.drawContours(outline, [screenCnt], -1, (0, 255, 0), 2)
 		cv2.imshow("Outline", outline)
@@ -54,6 +66,10 @@ def transform_image(image):
 
 		warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
 		final = cv2.adaptiveThreshold(warped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 15)
+	else:
+		final = cv2.adaptiveThreshold(eroded, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 9)
+		print "thresholded uncropped"
+	print "done warping"
 
 	return final
 
@@ -118,9 +134,11 @@ def four_point_transform(image, pts):
 	return warped 
 
 #final = transform_image(inputImage)
-#cv2.imwrite('warped.png', final)
+#cv2.imwrite('processed.png', final)
 
-#text = pytesseract.image_to_string(Image.open("warped.png"))
+#text = pytesseract.image_to_string(Image.open("processed.png"))
+
+#print text
 
 #tts = gTTS(text=text, lang='en')
 

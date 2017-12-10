@@ -46,7 +46,7 @@ def main():
 	ser = serial.Serial('/dev/ttyACM0')
 	print ser.name
 
-        global calibrated, tempBPMThreshold, awakeCount, asleepCount, lastStateAwake, awakeAvgCalculated, awakeTotal, awakeAvg, bpmCalibrated, bpmCalibratedCount, realBPM
+        global calibrated, sanitized_str, image_processed, tempBPMThreshold, awakeCount, asleepCount, lastStateAwake, awakeAvgCalculated, awakeTotal, awakeAvg, bpmCalibrated, bpmCalibratedCount, realBPM
 
 	print "starting loop"
 
@@ -102,7 +102,7 @@ def main():
 	        awakeAvgCalculated = True
 	        print "Average awake heart rate calcalated: " + str(awakeAvg)
 	
-	   #if asleepCount == 10:
+	  #if asleepCount == 20:
 	  if bpmCalibrated and awakeCount == 20:
 	    image_processed = False
 	    print 'user asleep, capturing image'
@@ -113,10 +113,11 @@ def main():
 
 	    sanitized_str = pytesseract.image_to_string(Image.open("processed.png"))
 	    print "sanitized string: " + sanitized_str
-	    tts = gTTS(text=sanitized_str, lang='en')
-	    tts.save("demo.mp3")
 	    image_processed = True
-	    os.system("mpg321 demo.mp3")
+	    if sanitized_str != "":
+	      tts = gTTS(text=sanitized_str, lang='en')
+	      tts.save("demo.mp3")
+	      os.system("mpg321 demo.mp3")
 	    break
 	
 	  # cv2.waitKey(500) 

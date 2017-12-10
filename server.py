@@ -12,13 +12,16 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     s.send_header("Content-type", "text/html")
     s.end_headers()
     if bpmCalibrated and calibrated:
-      s.wfile.write("BPM: " + str(realBPM))
+      s.wfile.write("BPM: " + str(realBPM) + "<br>")
     else:
-      s.wfile.write("BPM: NOT CALIBRATED YET")
+      s.wfile.write("BPM: NOT CALIBRATED YET" + "<br>")
     if awakeAvgCalculated:
-      s.wfile.write("Average awake heart rate: " + str(awakeAvg))
-    #if image_processed:
-    s.wfile.write("Reading text: " + sanitized_str)
+      s.wfile.write("Average awake heart rate: " + str(awakeAvg) + "<br>")
+    s.wfile.write("Image processed: " + str(image_processed) + "<br>")
+    if image_processed:
+      encoded_str = sanitized_str.encode('utf-8')
+      print "encoded string"
+      s.wfile.write("Reading text: " + encoded_str)
 
 Handler = MyRequestHandler
 server = SocketServer.TCPServer(('192.168.43.152', 8000), Handler)

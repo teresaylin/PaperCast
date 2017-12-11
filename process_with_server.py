@@ -89,6 +89,21 @@ bpmCalibratedCount = 0
 realBPM = 0
 print "starting loop"
 
+class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+  def do_GET(s):
+    """Respond to a GET request."""
+    s.send_response(200)
+    s.send_header("Content-type", "text/html")
+    s.end_headers()
+    if bpmCalibrated and calibrated:
+      s.wfile.write("BPM: " + str(realBPM))
+    else:
+      s.wfile.write("BPM: NOT CALIBRATED YET")
+    if awakeAvgCalculated:
+      s.wfile.write("Average awake heart rate: " + str(awakeAvg))
+    if image_processed:
+      s.wfile.write("Reading text: " + sanitized_str)
+
 while True:
   print "calibrated: " + str(calibrated)
   awake = True
@@ -147,20 +162,7 @@ while True:
       
   #cv2.waitKey(500) 
 
-class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
-  def do_GET(s):
-    """Respond to a GET request."""
-    s.send_response(200)
-    s.send_header("Content-type", "text/html")
-    s.end_headers()
-    if bpmCalibrated and calibrated:
-      s.wfile.write("BPM: " + str(realBPM))
-    else:
-      s.wfile.write("BPM: NOT CALIBRATED YET")
-    if awakeAvgCalculated:
-      s.wfile.write("Average awake heart rate: " + str(awakeAvg))
-    if image_processed:
-      s.wfile.write("Reading text: " + sanitized_str)
+
 
 Handler = MyRequestHandler
 server = SocketServer.TCPServer(('192.168.43.152', 8000), Handler)

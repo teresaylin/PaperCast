@@ -29,7 +29,7 @@ image_processed = False
 
 # process_image("good_textonly.png")
 
-tempBPMThreshold = 55
+tempBPMThreshold = 70
 awakeCount = 0
 asleepCount = 0
 lastStateAwake = True

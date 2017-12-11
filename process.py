@@ -13,8 +13,8 @@ import os
 import transform
 
 def getVariables():
-  global bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str
-  return (bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str)
+  global bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str, lastStateAwake
+  return (bpmCalibrated, calibrated, realBPM, awakeAvgCalculated, awakeAvg, image_processed, sanitized_str, lastStateAwake)
 
 def calibrate():
   global calibrated

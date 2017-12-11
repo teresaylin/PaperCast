@@ -29,7 +29,7 @@ image_processed = False
 
 # process_image("good_textonly.png")
 
-tempBPMThreshold = 70
+tempBPMThreshold = 55
 awakeCount = 0
 asleepCount = 0
 lastStateAwake = True
@@ -114,10 +114,12 @@ def main():
 	    sanitized_str = pytesseract.image_to_string(Image.open("processed.png"))
 	    print "sanitized string: " + sanitized_str
 	    image_processed = True
+            encoded_str = sanitized_str.encode('utf-8').replace('"',"'")
+            os.system('espeak "' + encoded_str + '"')
 	    if sanitized_str != "":
 	      tts = gTTS(text=sanitized_str, lang='en')
 	      tts.save("demo.mp3")
-	      os.system("mpg321 demo.mp3")
+	      #os.system("mpg321 demo.mp3")
 	    break
 	
 	  # cv2.waitKey(500) 

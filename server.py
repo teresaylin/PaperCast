@@ -10,26 +10,28 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     """Respond to a GET request."""
     s.send_response(200)
     s.send_header("Content-type", "text/html")
+
     s.end_headers()
-    s.wfile.write("<h1><strong>BPM: </strong></h1>")
+    s.wfile.write("<center><h1 style='font-size: 72pt; font-family:verdana;'><strong>PaperCast </strong><h1></center>")
+    s.wfile.write("<center><h2 style='font-size: 36pt; font-family:verdana;'><strong>BPM: </strong></h2></center>")
     if bpmCalibrated and calibrated:
-      s.wfile.write("<h1 style='color:red'>" + str(realBPM) + "</h1>")
+      s.wfile.write("<center><h2 style='font-size: 36pt; color: #bc3451; font-family:verdana;'><strong>"+ str(realBPM)+"</strong></h2></center>")
     else:
-      s.wfile.write("<h1 style='color:gray'>Not calibrated" + "</h1>")
-    s.wfile.write("<h1><strong>Average awake heart rate: </strong></h1>")
+      s.wfile.write("<center><h2 style='font-size: 36pt; color: #333333; font-family:verdana;'><strong>Not Calibrated</strong></h2></center>")
+    s.wfile.write("<center><h2 style='font-size: 36pt; font-family:verdana;'><strong>Average Awake Heart Rate: </strong></h2></center>")
     if awakeAvgCalculated:
-      s.wfile.write("<h1 style='color:red'>" + str(awakeAvg) + "</h1>")
-    
-    s.wfile.write("<h1><strong>Status of reader: </strong></h1>")
+      s.wfile.write("<center><h2 style='font-size: 36pt; color: #bc3451; font-family:verdana;'><strong>" + str(awakeAvg) +" </strong></h2></center>")
+
+    s.wfile.write("<center><h2 style='font-size: 36pt; font-family:verdana;'><strong>Status of Reader:</strong></h2></center>")
     if lastStateAwake:
-      s.wfile.write("<h1 style='color:red'>Awake</h1>")
+      s.wfile.write("<center><h2 style='font-size: 36pt; color: #bc3451; font-family:verdana;'><strong>Awake</strong></h2></center>")
     else:
-      s.wfile.write("<h1 style='color:red'>Asleep</h1>")
+      s.wfile.write("<center><h2 style='font-size: 36pt; color: #bc3451; font-family:verdana;'><strong>Asleep</strong></h2></center>")
     if image_processed:
       encoded_str = sanitized_str.encode('utf-8')
       print "encoded string"
-      s.wfile.write("<h1><strong>Reading text: </strong></h1>")
-      s.wfile.write("<p style='color:darkgreen;font-size: large;'>" + encoded_str + "</p>")
+      s.wfile.write("<center><h2 style='font-size: 36pt; font-family:verdana;'><strong>Text: </strong></h2></center>")
+      s.wfile.write("<justified><p style='font-size: 12pt; color: #111111; font-family:verdana; margin: 0px 100px 100px 100px;'>"+encoded_str+"</p></justified>")
 
 Handler = MyRequestHandler
 server = SocketServer.TCPServer(('192.168.43.152', 8000), Handler)
@@ -44,5 +46,3 @@ except KeyboardInterrupt:
 	server.server_close()
   	print "keyboard interrupt"
 	pass
-
-

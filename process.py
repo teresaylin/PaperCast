@@ -67,7 +67,7 @@ def main():
 	  try:
 	    # if finalStringBPM != '':
 	    BPM = int(finalStringBPM)
-	    if BPM < 80:
+	    if BPM < 95:
 	      bpmCalibratedCount += 1
 	      realBPM = BPM
 	      if not bpmCalibrated and bpmCalibratedCount == 15:
@@ -102,8 +102,9 @@ def main():
 	        awakeAvgCalculated = True
 	        print "Average awake heart rate calcalated: " + str(awakeAvg)
 	
-	  #if asleepCount == 20:
-	  if bpmCalibrated and awakeCount == 20:
+	  if asleepCount == 10:
+	  #if bpmCalibrated and awakeCount == 20:
+	    lastStateAwake = False
 	    image_processed = False
 	    print 'user asleep, capturing image'
 	    camera.capture('text.png')

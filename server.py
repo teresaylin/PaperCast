@@ -17,7 +17,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     if bpmCalibrated and calibrated:
       s.wfile.write("<center><h2 style='font-size: 36pt; color: #bc3451; font-family:verdana;'><strong>"+ str(realBPM)+"</strong></h2></center>")
     else:
-      s.wfile.write("<center><h2 style='font-size: 36pt; color: #333333; font-family:verdana;'><strong>Not Calibrated</strong></h2></center>")
+      s.wfile.write("<center><h2 style='font-size: 36pt; color: #aaaaaa; font-family:verdana;'><strong>Not Calibrated</strong></h2></center>")
     s.wfile.write("<center><h2 style='font-size: 36pt; font-family:verdana;'><strong>Average Awake Heart Rate: </strong></h2></center>")
     if awakeAvgCalculated:
       s.wfile.write("<center><h2 style='font-size: 36pt; color: #bc3451; font-family:verdana;'><strong>" + str(awakeAvg) +" </strong></h2></center>")
